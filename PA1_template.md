@@ -1,13 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
-    pandoc_args: [
-      "+RTS", "-K64m",
-      "-RTS"
-    ]    
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -21,7 +12,8 @@ To process this data;
 * eliminate the NA values with the help of _complete.cases_ function
 
 
-```{r, echo=TRUE}
+
+```r
 data<-read.csv(unzip("activity.zip", "activity.csv"))
 data<-data[complete.cases(data),]
 ```
@@ -36,58 +28,98 @@ To answer this question;
 
 * calculate the mean
 
-```{r, echo=TRUE}
+
+```r
 totalPerDay<-aggregate(data$steps, by=list(data$date), FUN=sum)
 names(totalPerDay) <- c("Date", "Sum") # we are re-naming the columns
 mean(totalPerDay$Sum)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(totalPerDay$Sum)
 ```
 
+```
+## [1] 10765
+```
+
 By plotting histogram of the total number of steps taken each day, we can verify median and mean. You can see that in most of the days, the person has steps between 10000-15000.
-```{r, echo=TRUE}
+
+```r
 hist(totalPerDay$Sum, breaks = 10)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 
 ## What is the average daily activity pattern?
 
-```{r, echo=TRUE}
+
+```r
 avaragePerInterval<-aggregate(data$steps, by=list(data$interval), FUN=mean)
 names(avaragePerInterval)<-c("Int", "Avg")
 plot(avaragePerInterval$Int, avaragePerInterval$Avg, type="l")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r, echo=TRUE}
+
+```r
 avaragePerInterval$Int[which(avaragePerInterval$Avg==max(avaragePerInterval$Avg))]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 Calculate and report the total number of missing values in the dataset 
-```{r, echo=TRUE}
+
+```r
 data<-read.csv(unzip("activity.zip", "activity.csv"))
 length( which(complete.cases(data)==FALSE) )
 ```
 
+```
+## [1] 2304
+```
+
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-```{r, echo=TRUE}
+
+```r
 m<-mean(data$steps, na.rm = TRUE)
 data$steps[is.na(data$steps)]<-m
 ```
 
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r, echo=TRUE}
+
+```r
 data1<-read.csv(unzip("activity.zip", "activity.csv"))
 data2<-data1[complete.cases(data1),]
 ```
 
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r, echo=TRUE}
+
+```r
 hist(aggregate(steps ~ date, data = data2, sum)$steps, breaks = 10)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
+```r
 mean(data2$steps)
+```
+
+```
+## [1] 37.3826
 ```
 
 
@@ -99,7 +131,8 @@ To compare activities we should find avarage steps for each for each interval an
 
 * _weekday=FALSE_ means it is weekend (Saturday,Sunday)
 
-```{r, echo=TRUE}
+
+```r
 data2$date<-as.Date(data2$date)
 data2$day<-weekdays(data2$date)
 data2$weekday<-TRUE
@@ -109,11 +142,18 @@ stepsByIntervalAndWeekday <- aggregate(steps ~ interval + weekday, data = data2,
 ```
 
 Let's plot data for weekday and weekend with lattice and ggplot2.
-```{r, echo=TRUE}
+
+```r
 library(lattice)
 xyplot(steps ~ interval | weekday, data=stepsByIntervalAndWeekday, type="l")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
+
+```r
 library(ggplot2)
 g <- ggplot(stepsByIntervalAndWeekday, aes(interval, steps))
 g + geom_line() + facet_grid(.~weekday)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-2.png) 
